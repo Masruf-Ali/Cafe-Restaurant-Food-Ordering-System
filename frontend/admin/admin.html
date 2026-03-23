@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Admin Panel</h2>
+<button onclick="load()">View Orders</button>
+<ul id="list"></ul>
+<script>
+function load(){
+fetch("/admin/orders").then(r=>r.json()).then(d=>{
+list.innerHTML="";
+d.forEach(o=>{
+list.innerHTML+=`<li>${o[0]} - Rs${o[1]}</li>`
+})
+})
+}
+</script>
+</body>
+</html>
