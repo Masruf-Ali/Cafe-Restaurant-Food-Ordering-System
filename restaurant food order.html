@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Ordering System with Backend Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f5f0;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(to right, #3a2c1e, #5c4429);
+            color: #f8f5f0;
+            padding: 30px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .welcome-message {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 1100px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .menu-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .menu-item {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        }
+        
+        .item-image {
+            height: 160px;
+            background-color: #7a5c3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .item-details {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .item-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #3a2c1e;
+        }
+        
+        .item-price {
+            color: #7a5c3c;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .add-btn {
+            background-color: #7a5c3c;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: auto;
+            font-weight: bold;
+        }
+        
+        .add-btn:hover {
+            background-color: #5c4429;
+        }
+        
+        .order-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            height: fit-content;
+        }
+        
+        .order-title {
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            color: #3a2c1e;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        #order-items {
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        
+        .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            background: #f0e6d8;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .quantity-btn:hover {
+            background: #e0d0b9;
+        }
+        
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: 5px;
+        }
+        
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.4rem;
+            font-weight: bold;
+            padding: 20px 0;
+            color: #3a2c1e;
+            border-top: 2px solid #eee;
+            margin-top: 10px;
+        }
+        
+        .checkout-btn {
+            background: linear-gradient(to right, #3a7634, #4a8c44);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .checkout-btn:hover {
+            background: linear-gradient(to right, #2a5925, #3a7634);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            background-color: #f44336;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        .empty-order {
+            text-align: center;
+            color: #888;
+            padding: 30px 20px;
+            font-style: italic;
+        }
+        
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .secondary-btn {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            flex: 1;
+            font-weight: bold;
+        }
+        
+        .secondary-btn:hover {
+            background: #d0d0d0;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        /* Backend Response Panel */
+        .backend-panel {
+            background: #2c3e50;
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .backend-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .backend-content {
+            background: #1a2530;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .backend-tabs {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .backend-tab {
+            padding: 8px 15px;
+            background: #34495e;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        
+        .backend-tab.active {
+            background: #1a2530;
+        }
+        
+        .clear-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .clear-btn:hover {
+            background: #c0392b;
+        }
+        
+        .response-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .response-time {
+            color: #95a5a6;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .response-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+        
+        .status-success {
+            background: #27ae60;
+        }
+        
+        .status-error {
+            background: #e74c3c;
+        }
+        
+        .response-url {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Welcome to Our Cafe</h1>
+            <p class="welcome-message">Enjoy our delicious food and beverages</p>
+        </header>
+        
+        <div class="content">
+            <div class="menu-column">
+                <h2>Our Menu</h2>
+                <div class="menu-container" id="menu-container">
+                    <!-- Menu items will be generated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="order-section">
+                <h2 class="order-title">Your Order</h2>
+                <div id="order-items">
+                    <p class="empty-order">Your order is empty. Please select items from the menu.</p>
+                </div>
+                <div class="order-total">
+                    <span>Total:</span>
+                    <span id="total-amount">Rs0</span>
+                </div>
+                <button class="checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+                <div class="order-actions">
+                    <button class="secondary-btn" id="clear-btn">Clear Order</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Backend Response Panel -->
+        <div class="backend-panel">
+            <div class="backend-title">
+                <h2>Backend Responses</h2>
+                <button class="clear-btn" id="clear-responses">Clear</button>
+            </div>
+            
+            <div class="backend-tabs">
+                <div class="backend-tab active">API Calls</div>
+                <div class="backend-tab">Order History</div>
+            </div>
+            
+            <div class="backend-content" id="backend-responses">
+                <div class="empty-response">No backend requests yet. Orders will appear here.</div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Cafe Delights | All orders are subject to terms and conditions</p>
+        </footer>
+    </div>
+    
+    <div class="notification" id="notification">
+        Item is not available in our cafe. Please order something else.
+    </div>
+
+    <script>
+        // Menu data with additional information
+        const menu = {
+            'Pizza': { price: 40, image: '🍕' },
+            'Pasta': { price: 50, image: '🍝' },
+            'Salad': { price: 60, image: '🥗' },
+            'Burger': { price: 70, image: '🍔' },
+            'Coffee': { price: 15, image: '☕' },
+            'Tea': { price: 10, image: '🍵' }
+        };
+        
+        let orderTotal = 0;
+        let orderItems = [];
+        let backendRequests = [];
+        
+        // DOM elements
+        const menuContainer = document.getElementById('menu-container');
+        const orderItemsContainer = document.getElementById('order-items');
+        const totalAmountElement = document.getElementById('total-amount');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const notification = document.getElementById('notification');
+        const backendResponsesContainer = document.getElementById('backend-responses');
+        const clearResponsesBtn = document.getElementById('clear-responses');
+        
+        // Initialize the application
+        function init() {
+            generateMenu();
+            setupEventListeners();
+        }
+        
+        // Generate menu items
+        function generateMenu() {
+            for (const [item, details] of Object.entries(menu)) {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'menu-item';
+                menuItem.innerHTML = `
+                    <div class="item-image">${details.image}</div>
+                    <div class="item-details">
+                        <div class="item-name">${item}</div>
+                        <div class="item-price">Rs${details.price}</div>
+                        <button class="add-btn" data-item="${item}">Add to Order</button>
+                    </div>
+                `;
+                menuContainer.appendChild(menuItem);
+            }
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Add to order buttons
+            document.querySelectorAll('.add-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const itemName = this.getAttribute('data-item');
+                    addToOrder(itemName);
+                });
+            });
+            
+            // Checkout button
+            checkoutBtn.addEventListener('click', processOrder);
+            
+            // Clear order button
+            clearBtn.addEventListener('click', clearOrder);
+            
+            // Clear responses button
+            clearResponsesBtn.addEventListener('click', clearBackendResponses);
+        }
+        
+        // Add to order function
+        function addToOrder(itemName) {
+            if (menu[itemName]) {
+                // Check if item already exists in order
+                const existingItemIndex = orderItems.findIndex(item => item.name === itemName);
+                
+                if (existingItemIndex !== -1) {
+                    // Increment quantity if item already in order
+                    orderItems[existingItemIndex].quantity++;
+                } else {
+                    // Add new item to order
+                    orderItems.push({
+                        name: itemName,
+                        price: menu[itemName].price,
+                        quantity: 1
+                    });
+                }
+                
+                orderTotal += menu[itemName].price;
+                updateOrderDisplay();
+                
+                // Simulate API call to add item
+                simulateBackendCall('POST', '/api/order/add', { item: itemName })
+                    .then(response => {
+                        addBackendResponse('POST', '/api/order/add', response, true);
+                    })
+                    .catch(error => {
+                        addBackendResponse('POST', '/api/order/add', error, false);
+                    });
+            } else {
+                showNotification();
+            }
+        }
+        
+        // Process order function
+        function processOrder() {
+            if (orderItems.length === 0) {
+                alert('Please add at least one item to your order before checkout.');
+                return;
+            }
+            
+            // Simulate backend processing
+            simulateBackendOrder()
+                .then(response => {
+                    addBackendResponse('POST', '/api/order/checkout', response, true);
+                    
+                    alert(`Thank you for your order!\nYour total is: Rs${orderTotal}\nOrder ID: ${response.orderId}\nEstimated wait time: ${response.waitTime} minutes`);
+                    
+                    // Reset order
+                    clearOrder();
+                })
+                .catch(error => {
+                    addBackendResponse('POST', '/api/order/checkout', error, false);
+                    alert('There was an error processing your order. Please try again.');
+                    console.error('Order processing error:', error);
+                });
+        }
+        
+        // Update order display
+        function updateOrderDisplay() {
+            // Clear previous order items
+            orderItemsContainer.innerHTML = '';
+            
+            if (orderItems.length === 0) {
+                orderItemsContainer.innerHTML = '<p class="empty-order">Your order is empty. Please select items from the menu.</p>';
+                totalAmountElement.textContent = 'Rs0';
+                return;
+            }
+            
+            // Add current order items
+            orderItems.forEach((item, index) => {
+                const orderItem = document.createElement('div');
+                orderItem.className = 'order-item';
+                orderItem.innerHTML = `
+                    <div>
+                        <strong>${item.name}</strong>
+                        <div>Rs${item.price} x ${item.quantity}</div>
+                    </div>
+                    <div class="item-controls">
+                        <button class="quantity-btn" data-index="${index}" data-action="decrease">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="quantity-btn" data-index="${index}" data-action="increase">+</button>
+                        <button class="remove-btn" data-index="${index}">×</button>
+                    </div>
+                `;
+                orderItemsContainer.appendChild(orderItem);
+            });
+            
+            // Add event listeners to quantity buttons
+            document.querySelectorAll('.quantity-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const action = this.getAttribute('data-action');
+                    adjustQuantity(index, action);
+                });
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    removeItem(index);
+                });
+            });
+            
+            // Update total
+            totalAmountElement.textContent = `Rs${orderTotal}`;
+        }
+        
+        // Adjust item quantity
+        function adjustQuantity(index, action) {
+            if (action === 'increase') {
+                orderItems[index].quantity++;
+                orderTotal += orderItems[index].price;
+            } else if (action === 'decrease' && orderItems[index].quantity > 1) {
+                orderItems[index].quantity--;
+                orderTotal -= orderItems[index].price;
+            }
+            updateOrderDisplay();
+            
+            // Simulate API call to update quantity
+            simulateBackendCall('PUT', '/api/order/update', { 
+                item: orderItems[index].name, 
+                quantity: orderItems[index].quantity 
+            });
+        }
+        
+        // Remove item from order
+        function removeItem(index) {
+            orderTotal -= orderItems[index].price * orderItems[index].quantity;
+            orderItems.splice(index, 1);
+            updateOrderDisplay();
+            
+            // Simulate API call to remove item
+            simulateBackendCall('DELETE', '/api/order/remove', { index });
+        }
+        
+        // Clear order
+        function clearOrder() {
+            orderTotal = 0;
+            orderItems = [];
+            updateOrderDisplay();
+            
+            // Simulate API call to clear order
+            simulateBackendCall('DELETE', '/api/order/clear', {})
+                .then(response => {
+                    addBackendResponse('DELETE', '/api/order/clear', response, true);
+                });
+        }
+        
+        // Show notification for unavailable items
+        function showNotification() {
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Simulate backend order processing
+        function simulateBackendOrder() {
+            return new Promise((resolve, reject) => {
+                // Simulate API call delay
+                setTimeout(() => {
+                    // Simulate random failure (10% chance)
+                    if (Math.random() < 0.1) {
+                        const error = {
+                            status: 500,
+                            message: 'Server unavailable',
+                            timestamp: new Date().toISOString()
+                        };
+                        reject(error);
+                        return;
+                    }
+                    
+                    // Generate random order ID
+                    const orderId = 'CAFE' + Math.floor(1000 + Math.random() * 9000);
+                    
+                    // Calculate estimated wait time (1 minute per item + 5 minutes)
+                    const waitTime = orderItems.reduce((total, item) => total + item.quantity, 0) + 5;
+                    
+                    const response = {
+                        status: 200,
+                        orderId,
+                        waitTime,
+                        total: orderTotal,
+                        items: orderItems,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    resolve(response);
+                }, 1500); // Simulate network delay
+            });
+        }
+        
+        // Simulate generic backend call
+        function simulateBackendCall(method, endpoint, data) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const response = {
+                        status: 200,
+                        method,
+                        endpoint,
+                        data,
+                        timestamp: new Date().toISOString(),
+                        message: 'Operation successful'
+                    };
+                    resolve(response);
+                }, 800);
+            });
+        }
+        
+        // Add backend response to the UI
+        function addBackendResponse(method, endpoint, data, success) {
+            const responseElement = document.createElement('div');
+            responseElement.className = 'response-item';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const statusClass = success ? 'status-success' : 'status-error';
+            const statusText = success ? '200 OK' : '500 Error';
+            
+            responseElement.innerHTML = `
+                <div class="response-time">${timestamp}</div>
+                <div>
+                    <span class="response-status ${statusClass}">${statusText}</span>
+                    <span class="response-url">${method} ${endpoint}</span>
+                </div>
+                <div>${JSON.stringify(data, null, 2)}</div>
+            `;
+            
+            // Remove empty response message if it exists
+            const emptyResponse = backendResponsesContainer.querySelector('.empty-response');
+            if (emptyResponse) {
+                emptyResponse.remove();
+            }
+            
+            backendResponsesContainer.prepend(responseElement);
+            backendRequests.unshift({ method, endpoint, data, success, timestamp });
+        }
+        
+        // Clear backend responses
+        function clearBackendResponses() {
+            backendResponsesContainer.innerHTML = '<div class="empty-response">No backend requests yet. Orders will appear here.</div>';
+            backendRequests = [];
+        }
+        
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
